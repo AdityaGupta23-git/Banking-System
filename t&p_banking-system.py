@@ -3,22 +3,15 @@ import re
 import pyodbc
 from datetime import datetime
 
-# Database connection
-# conn = pyodbc.connect(
-#     'DRIVER={ODBC Driver 17 for SQL Server};'
-#     'SERVER=your_server_name;'
-#     'DATABASE=banking_system;'
-#     'UID=your_username;'
-#     'PWD=your_password;'
-# )
+
 server = 'DESKTOP-U7RDVH2\\SQLEXPRESS'
 database = 'Banking_System'
-# Establish a connection to the SQL Server
+
 conn = pyodbc.connect(f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes')
 
 cursor = conn.cursor()
 
-# Create tables
+
 cursor.execute('''IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='users' AND xtype='U')
 CREATE TABLE users (
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -45,7 +38,7 @@ CREATE TABLE transactions (
 
 conn.commit()
 
-# Utility functions
+
 def validate_email(email):
     return re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email)
 
@@ -65,7 +58,7 @@ def validate_date(dob):
     except ValueError:
         return False
 
-# Features
+
 def add_user():
     while True:
         name = input("Enter name: ")
@@ -108,7 +101,7 @@ def add_user():
 
         account_number = generate_account_number()
 
-        # Retry logic for account number uniqueness
+        
         while True:
             try:
                 cursor.execute(
@@ -164,7 +157,7 @@ def login():
                 print("Amount credited successfully.")
 
 
-            elif choice == 4:  # Debit Amount
+            elif choice == 4:  
 
                 try:
 
@@ -175,7 +168,7 @@ def login():
 
                         continue
 
-                    # Fetch the latest balance from the database
+                    
 
                     cursor.execute("SELECT balance FROM users WHERE account_number = ?", (account_number,))
 
@@ -187,12 +180,12 @@ def login():
 
                     else:
 
-                        # Deduct the amount from the balance
+                        
 
                         cursor.execute("UPDATE users SET balance = balance - ? WHERE account_number = ?",
                                        (amount, account_number))
 
-                        # Record the transaction
+                        
 
                         cursor.execute(
 
@@ -216,7 +209,7 @@ def login():
 
                 amount = float(input("Enter amount to transfer: "))
 
-                # Fetch the balance of the user
+                
 
                 cursor.execute("SELECT balance FROM users WHERE account_number = ?", (account_number,))
 
@@ -232,7 +225,7 @@ def login():
 
                     return
 
-                # Check if the target account exists
+                
 
                 cursor.execute("SELECT balance FROM users WHERE account_number = ?", (target_account,))
 
@@ -243,35 +236,35 @@ def login():
 
                     return
 
-                # Proceed with the transfer
+                
 
                 try:
 
-                    # Begin transaction
+                    
 
                     cursor.execute("BEGIN TRANSACTION")
 
-                    # Deduct from the sender
+                    
 
                     cursor.execute("UPDATE users SET balance = balance - ? WHERE account_number = ?", (amount, account_number))
 
-                    # Add to the receiver
+                    
 
                     cursor.execute("UPDATE users SET balance = balance + ? WHERE account_number = ?", (amount, target_account))
 
-                    # Record the transaction for sender
+                    
 
                     cursor.execute("INSERT INTO transactions (account_number, type, amount, date) VALUES (?, 'Transfer', ?, ?)",
 
                                    (account_number, amount, datetime.now()))
 
-                    # Record the transaction for receiver
+                    
 
                     cursor.execute("INSERT INTO transactions (account_number, type, amount, date) VALUES (?, 'Receive', ?, ?)",
 
                                    (target_account, amount, datetime.now()))
 
-                    # Commit the transaction
+                    
 
                     conn.commit()
 
@@ -280,7 +273,7 @@ def login():
 
                 except Exception as e:
 
-                    # Handle potential errors and rollback if anything goes wrong
+                    
 
                     print(f"An error occurred: {e}")
 
@@ -290,7 +283,7 @@ def login():
 
             elif choice == 6:
 
-                # Fetch the current status of the account
+          
 
                 cursor.execute("SELECT is_active FROM users WHERE account_number = ?", (account_number,))
 
@@ -303,11 +296,11 @@ def login():
 
                 current_status = account_status[0]
 
-                # Toggle account status (active -> inactive, inactive -> active)
+                
 
                 new_status = 0 if current_status else 1
 
-                # Update the account's active status in the database
+                
 
                 cursor.execute("UPDATE users SET is_active = ? WHERE account_number = ?", (new_status, account_number))
 
@@ -374,5 +367,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Close the database connection on exit
+
 conn.close()
