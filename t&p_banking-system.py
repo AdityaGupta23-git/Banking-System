@@ -1,3 +1,7 @@
+#Name:Aditya Gupta
+#Enrollment no.-0176AL221010
+#College: LNCT-E 
+#Branch: Cse-AIML 
 import random
 import re
 import pyodbc
